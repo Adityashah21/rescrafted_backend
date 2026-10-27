@@ -47,8 +47,8 @@ const isOriginAllowed = (origin) => {
   if (!origin) return true; // Server-to-server, curl, mobile
   const cleanOrigin = origin.trim().replace(/\/+$/, '');
   if (allowedOrigins.includes(cleanOrigin)) return true;
-  // Match any Vercel deployment for this project (e.g. preview branches)
-  if (/^https:\/\/rescrafted-frontend(-[a-z0-9-]+)?\.vercel\.app$/.test(cleanOrigin)) return true;
+  // Match any Vercel deployment for this project (production, preview branches, personal forks)
+  if (/^https:\/\/rescrafted-frontend.*\.vercel\.app$/.test(cleanOrigin)) return true;
   return false;
 };
 
