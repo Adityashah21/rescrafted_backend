@@ -36,18 +36,19 @@ const defaultOrigins = [
   'http://localhost:3000'
 ];
 
-// Clean and normalize env.FRONTEND_URL if provided
-const configuredFrontend = env.FRONTEND_URL
-  ? env.FRONTEND_URL.trim().replace(/\/+$/, '')
-  : null;
+// Clean and normalize env.FRONTEND_URL if provided (support comma-separated origins)
+const configuredFrontends = env.FRONTEND_URL
+  ? env.FRONTEND_URL.split(',').map((u) => u.trim().replace(/\/+$/, '')).filter(Boolean)
+  : [];
 
-const allowedOrigins = [configuredFrontend, ...defaultOrigins].filter(Boolean);
+const allowedOrigins = Array.from(new Set([...configuredFrontends, ...defaultOrigins]));
 
 const isOriginAllowed = (origin) => {
   if (!origin) return true; // Server-to-server, curl, mobile
-  if (allowedOrigins.includes(origin)) return true;
+  const cleanOrigin = origin.trim().replace(/\/+$/, '');
+  if (allowedOrigins.includes(cleanOrigin)) return true;
   // Match any Vercel deployment for this project (e.g. preview branches)
-  if (/^https:\/\/rescrafted-frontend(-[a-z0-9-]+)?\.vercel\.app$/.test(origin)) return true;
+  if (/^https:\/\/rescrafted-frontend(-[a-z0-9-]+)?\.vercel\.app$/.test(cleanOrigin)) return true;
   return false;
 };
 
@@ -57,12 +58,13 @@ app.use(
       if (isOriginAllowed(origin)) {
         callback(null, true);
       } else {
-        callback(new Error(`Origin ${origin} not allowed by CORS`));
+        // Pass false so CORS headers are omitted without throwing a 500 error
+        callback(null, false);
       }
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
     exposedHeaders: ['Set-Cookie']
   })
 );
