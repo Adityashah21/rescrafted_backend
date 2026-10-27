@@ -1,28 +1,44 @@
 {
-  "name": "backend",
+  "name": "rescrafted-backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
+  "description": "e-commerce",
+  "keywords": [
+    "e-commerce"
+  ],
   "license": "ISC",
+  "author": "aditya",
   "type": "commonjs",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "seed": "node src/seed/seedData.js",
+    "test": "node --test tests/index.test.js",
+    "smoke": "node scripts/smokeTest.js"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.3",
-    "cloudinary": "^2.9.0",
+    "cloudinary": "^2.10.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
-    "dotenv": "^17.4.0",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "imagekit": "^6.0.0",
+    "express-rate-limit": "^8.7.1",
+    "helmet": "^8.3.0",
+    "i": "^0.3.7",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.3.3",
-    "multer": "^2.1.1",
-    "multer-storage-cloudinary": "^2.2.1"
+    "mongoose": "^9.9.2",
+    "multer": "^2.2.0",
+    "nodemailer": "^9.0.5",
+    "pino": "^10.4.0",
+    "pino-http": "^11.0.0",
+    "pino-pretty": "^13.2.0",
+    "razorpay": "^2.9.8",
+    "slugify": "^1.6.9",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "supertest": "^7.3.1"
   }
 }
