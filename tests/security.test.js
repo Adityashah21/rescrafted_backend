@@ -59,12 +59,37 @@ describe('Security & Performance Audit Suite (Phase 10)', () => {
     assert.equal(res.headers['access-control-allow-credentials'], 'true');
   });
 
-  test('CORS rejects unauthorized origin with an error', async () => {
+  test('OPTIONS preflight for /api/v1/auth/login succeeds with 204 and CORS headers', async () => {
+    const res = await request
+      .options('/api/v1/auth/login')
+      .set('Origin', 'https://rescrafted-frontend.vercel.app')
+      .set('Access-Control-Request-Method', 'POST')
+      .set('Access-Control-Request-Headers', 'content-type,authorization');
+
+    assert.equal(res.status, 204);
+    assert.equal(res.headers['access-control-allow-origin'], 'https://rescrafted-frontend.vercel.app');
+    assert.equal(res.headers['access-control-allow-credentials'], 'true');
+    assert.match(res.headers['access-control-allow-methods'], /POST/);
+  });
+
+  test('OPTIONS preflight for /api/v1/auth/register succeeds with 204 and CORS headers', async () => {
+    const res = await request
+      .options('/api/v1/auth/register')
+      .set('Origin', 'https://rescrafted-frontend.vercel.app')
+      .set('Access-Control-Request-Method', 'POST')
+      .set('Access-Control-Request-Headers', 'content-type,authorization');
+
+    assert.equal(res.status, 204);
+    assert.equal(res.headers['access-control-allow-origin'], 'https://rescrafted-frontend.vercel.app');
+    assert.equal(res.headers['access-control-allow-credentials'], 'true');
+    assert.match(res.headers['access-control-allow-methods'], /POST/);
+  });
+
+  test('CORS rejects unauthorized origin by omitting Access-Control-Allow-Origin', async () => {
     const res = await request
       .get('/api/v1/health')
       .set('Origin', 'https://malicious-astroturfing-site.com');
 
-    // CORS error handler intercepts and returns 500 error envelope
     assert.notEqual(res.headers['access-control-allow-origin'], 'https://malicious-astroturfing-site.com');
   });
 
