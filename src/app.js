@@ -25,6 +25,9 @@ const reviewRoutes = require('./routes/reviewRoutes');
 
 const app = express();
 
+// Trust reverse proxy headers from hosting platforms (Render, Cloudflare, etc.)
+app.set('trust proxy', 1);
+
 // Security HTTP Headers
 app.use(helmet());
 
