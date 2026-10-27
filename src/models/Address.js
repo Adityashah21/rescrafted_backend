@@ -18,7 +18,7 @@ const addressSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Contact phone number is required'],
       trim: true,
-      match: [/^[0-9+ -]{10,15}$/, 'Please enter a valid phone number']
+      match: [/^[0-9+ -]{8,15}$/, 'Please enter a valid phone number']
     },
     addressLine1: {
       type: String,
