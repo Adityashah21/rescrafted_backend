@@ -13,6 +13,9 @@ class EmailService {
           user: env.EMAIL_USER,
           pass: env.EMAIL_PASS,
         },
+        connectionTimeout: 5000, // 5s connection timeout
+        greetingTimeout: 5000,
+        socketTimeout: 5000,
       });
     }
   }
@@ -40,11 +43,8 @@ class EmailService {
       return info;
     } catch (error) {
       logger.error(`Failed to send email to ${to}: ${error.message}`);
-      // Do not throw in non-production environments to avoid blocking workflows
-      if (env.NODE_ENV === 'production') {
-        throw error;
-      }
-      return { error: error.message };
+      // Log email failure safely without aborting user registration or critical operations
+      return { success: false, error: error.message };
     }
   }
 

@@ -14,7 +14,7 @@ class AuthService {
     // 2. Check duplicate email
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
-      throw new AppError('An account with this email address already exists.', 409, 'DUPLICATE_EMAIL');
+      throw new AppError('An account with this email address already exists. Please sign in.', 409, 'DUPLICATE_EMAIL');
     }
 
     // 3. Generate 6-digit OTP for email verification
