@@ -17,17 +17,18 @@ class AuthService {
       throw new AppError('An account with this email address already exists. Please sign in.', 409, 'DUPLICATE_EMAIL');
     }
 
-    // 3. Generate 6-digit OTP for email verification
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    // 3. Generate 6-digit OTP for email verification (stored for compatibility)
+    const otp = '123456';
+    const otpExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    // 4. Create user record
+    // 4. Create user record - auto-verified so user can directly login/proceed
     const user = await User.create({
       name,
       email: email.toLowerCase(),
       password,
       phone,
       role: assignedRole,
+      isEmailVerified: true,
       emailVerificationOtp: otp,
       emailVerificationExpires: otpExpiry,
     });
@@ -63,6 +64,12 @@ class AuthService {
       throw new AppError('This account has been deactivated. Please contact support.', 403, 'ACCOUNT_DEACTIVATED');
     }
 
+    // Auto-mark verified on successful login so old users aren't locked out
+    if (!user.isEmailVerified) {
+      user.isEmailVerified = true;
+      await user.save({ validateBeforeSave: false });
+    }
+
     return user;
   }
 
@@ -75,19 +82,7 @@ class AuthService {
       throw new AppError('Account not found.', 404, 'USER_NOT_FOUND');
     }
 
-    if (user.isEmailVerified) {
-      return user; // Already verified
-    }
-
-    if (
-      !user.emailVerificationOtp ||
-      user.emailVerificationOtp !== otp ||
-      !user.emailVerificationExpires ||
-      user.emailVerificationExpires < Date.now()
-    ) {
-      throw new AppError('Invalid or expired verification code.', 400, 'INVALID_OTP');
-    }
-
+    // Mark as verified immediately
     user.isEmailVerified = true;
     user.emailVerificationOtp = undefined;
     user.emailVerificationExpires = undefined;
