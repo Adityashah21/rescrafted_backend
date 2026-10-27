@@ -55,13 +55,20 @@ async function runSmokeTests() {
       }
     },
     {
-      name: 'CORS Allowlist Security Policy',
+      name: 'CORS Allowlist Security Policy (Local & Vercel Production)',
       run: async () => {
-        const allowedRes = await request
+        const localRes = await request
           .get('/api/v1/health')
           .set('Origin', 'http://localhost:5173');
-        if (allowedRes.headers['access-control-allow-origin'] !== 'http://localhost:5173') {
-          throw new Error('Valid origin was not granted access');
+        if (localRes.headers['access-control-allow-origin'] !== 'http://localhost:5173') {
+          throw new Error('Local origin was not granted access');
+        }
+
+        const vercelRes = await request
+          .get('/api/v1/health')
+          .set('Origin', 'https://rescrafted-frontend.vercel.app');
+        if (vercelRes.headers['access-control-allow-origin'] !== 'https://rescrafted-frontend.vercel.app') {
+          throw new Error('Vercel production origin was not granted access');
         }
       }
     },

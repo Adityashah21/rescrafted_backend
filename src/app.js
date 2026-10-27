@@ -29,18 +29,32 @@ const app = express();
 app.use(helmet());
 
 // Cross-Origin Resource Sharing (CORS) with explicit allowlist
-const allowedOrigins = [
-  env.FRONTEND_URL,
+const defaultOrigins = [
+  'https://rescrafted-frontend.vercel.app',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
   'http://localhost:3000'
-].filter(Boolean);
+];
+
+// Clean and normalize env.FRONTEND_URL if provided
+const configuredFrontend = env.FRONTEND_URL
+  ? env.FRONTEND_URL.trim().replace(/\/+$/, '')
+  : null;
+
+const allowedOrigins = [configuredFrontend, ...defaultOrigins].filter(Boolean);
+
+const isOriginAllowed = (origin) => {
+  if (!origin) return true; // Server-to-server, curl, mobile
+  if (allowedOrigins.includes(origin)) return true;
+  // Match any Vercel deployment for this project (e.g. preview branches)
+  if (/^https:\/\/rescrafted-frontend(-[a-z0-9-]+)?\.vercel\.app$/.test(origin)) return true;
+  return false;
+};
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (isOriginAllowed(origin)) {
         callback(null, true);
       } else {
         callback(new Error(`Origin ${origin} not allowed by CORS`));
@@ -48,7 +62,8 @@ app.use(
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    exposedHeaders: ['Set-Cookie']
   })
 );
 

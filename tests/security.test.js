@@ -36,6 +36,29 @@ describe('Security & Performance Audit Suite (Phase 10)', () => {
     assert.equal(res.headers['access-control-allow-credentials'], 'true');
   });
 
+  test('CORS explicitly allows production Vercel frontend origin', async () => {
+    const res = await request
+      .get('/api/v1/health')
+      .set('Origin', 'https://rescrafted-frontend.vercel.app');
+
+    assert.equal(res.status, 200);
+    assert.equal(res.headers['access-control-allow-origin'], 'https://rescrafted-frontend.vercel.app');
+    assert.equal(res.headers['access-control-allow-credentials'], 'true');
+  });
+
+  test('CORS allows Vercel preview deployment origins', async () => {
+    const res = await request
+      .get('/api/v1/health')
+      .set('Origin', 'https://rescrafted-frontend-preview-git-main.vercel.app');
+
+    assert.equal(res.status, 200);
+    assert.equal(
+      res.headers['access-control-allow-origin'],
+      'https://rescrafted-frontend-preview-git-main.vercel.app'
+    );
+    assert.equal(res.headers['access-control-allow-credentials'], 'true');
+  });
+
   test('CORS rejects unauthorized origin with an error', async () => {
     const res = await request
       .get('/api/v1/health')
